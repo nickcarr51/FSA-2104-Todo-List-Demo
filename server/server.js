@@ -13,7 +13,8 @@ app.use(express.static(DIST_PATH));
 app.use(express.json());
 
 app.get('/todos', async (req, res) => {
-  const todos = await Todo.findAll();
+  const { complete } = req.query;
+  const todos = await Todo.findAll({ where: { complete: complete }});
   res.status(200).send(todos);
 })
 
@@ -48,6 +49,10 @@ app.delete('/:id', async (req, res) => {
   }
 
 })
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/index.html'));
+});
 
 
 app.listen(PORT, () => {

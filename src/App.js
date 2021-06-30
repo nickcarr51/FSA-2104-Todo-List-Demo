@@ -1,82 +1,32 @@
-import React, { Component } from "react";
-import axios from "axios";
+import React from "react";
 import TodoContainer from "./TodoContainer";
-import Form from './Form';
+import Form from "./Form";
+import Navbar from "./Navbar";
+import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
 
-class App extends Component {
-  constructor() {
-    super();
-    this.state = {
-      todos: [],
-    };
-    this.changeStatus = this.changeStatus.bind(this);
-    this.submit = this.submit.bind(this);
-    this.deleteTodo = this.deleteTodo.bind(this);
-  }
-
-  async componentDidMount() {
-    const { data } = await axios.get("/todos");
-    this.setState({ todos: data });
-  }
-
-  async changeStatus(id, complete) {
-    try {
-      await axios.put(`/${id}`, { newStatus: complete });
-      this.setState({
-        todos: this.state.todos.map(todo => {
-          if (todo.id === id) {
-            todo.complete = !todo.complete;
-            return todo;
-          }
-          return todo;
-        })
-      })
-    } catch (err) {
-      console.log(err);
-    }
-  }
-
-  async deleteTodo(id) {
-    try {
-      await axios.delete(`/${id}`);
-      this.setState({
-        todos: this.state.todos.filter(todo => todo.id !== id),
-      })
-    } catch (err) {
-      console.log(err);
-    }
-  }
-
-  async submit(text) {
-    const newTodo = (await axios.post('/create', { text })).data;
-    this.setState({
-      todos: [...this.state.todos, newTodo]
-    })
-  }
-
-  render() {
-    const { todos } = this.state;
-    return (
-      <div>
-        <header>
-          <h1>ToDos</h1>
-        </header>
-        <Form submit={this.submit}/>
+const App = () => {
+  return (
+    <div>
+      <BrowserRouter>
+        <Navbar />
+        <Route component={Form} />
         <div className="container">
-          <TodoContainer
-            deleteTodo={this.deleteTodo}
-            todos={todos.filter((todo) => !todo.complete)}
-            changeStatus={this.changeStatus}
-          />
-          <TodoContainer
-            deleteTodo={this.deleteTodo}
-            todos={todos.filter((todo) => todo.complete)} 
-            changeStatus={this.changeStatus}
-          />
+          <Switch>
+            <Route
+              exact
+              path="/"
+              render={() => <TodoContainer complete={false} />}
+            />
+            <Route
+              path="/complete"
+              render={() => <TodoContainer complete={true} />}
+            />
+            <Redirect to="/" />
+          </Switch>
         </div>
-      </div>
-    );
-  }
-}
+      </BrowserRouter>
+    </div>
+  );
+};
 
 export default App;
